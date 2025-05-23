@@ -1,6 +1,6 @@
-# Instagram Viewer Application
+# TileTale 📱✨
 
-A web application for viewing Instagram content with a secure backend for API authentication.
+A web application for viewing Instagram content with a secure backend for API authentication, featuring a grid view and extra cool features.
 
 ## Project Overview
 
@@ -8,6 +8,7 @@ This application allows users to:
 - Authenticate with Instagram using OAuth
 - View their Instagram feed, including posts and stories
 - See detailed information about posts and comments
+- View content in a customizable grid layout
 
 ## Architecture
 
