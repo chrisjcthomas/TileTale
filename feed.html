@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaView - Your Feed</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Backend API URL -->
+    <meta name="api-base-url" content="http://localhost:3000">
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">File</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">New</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Open</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Save</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Export</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Exit</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">View</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Zoom In</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Zoom Out</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Full Screen</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Split View</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Layout</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Grid</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">List</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Compact</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Custom</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Account</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem" id="profile-link">Profile</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Settings</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem" id="logout-link">Logout</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Tools</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Search</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Preferences</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Extensions</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Help</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Documentation</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Tutorials</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">About</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Support</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="feed-container">
+        <!-- User profile summary -->
+        <div class="user-profile">
+            <div class="profile-info">
+                <img src="" alt="Profile Picture" id="profile-picture" class="profile-picture">
+                <div class="profile-details">
+                    <h2 id="profile-username"></h2>
+                    <p id="profile-stats"></p>
+                </div>
+            </div>
+            <button id="refresh-feed" class="refresh-button">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Stories section -->
+        <div class="stories-container">
+            <h3>Stories</h3>
+            <div class="stories-scroll" id="stories-scroll">
+                <!-- Stories will be loaded here -->
+                <div class="loading-indicator">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Posts feed -->
+        <div class="posts-container" id="posts-container">
+            <!-- Posts will be loaded here -->
+            <div class="loading-indicator">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Story viewer modal -->
+    <div id="story-modal" class="modal">
+        <div class="modal-content story-modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="story-viewer">
+                <div class="story-header">
+                    <div class="story-user-info">
+                        <img src="" alt="User" class="story-user-pic">
+                        <span class="story-username"></span>
+                        <span class="story-time"></span>
+                    </div>
+                </div>
+                <div class="story-navigation">
+                    <button class="story-nav-btn prev-story">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="story-content">
+                        <!-- Story content will be loaded here -->
+                    </div>
+                    <button class="story-nav-btn next-story">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                <div class="story-progress">
+                    <!-- Progress bars will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post detail modal -->
+    <div id="post-modal" class="modal">
+        <div class="modal-content post-modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="post-detail">
+                <div class="post-detail-media">
+                    <!-- Post media will be loaded here -->
+                </div>
+                <div class="post-detail-info">
+                    <div class="post-detail-header">
+                        <img src="" alt="User" class="post-user-pic">
+                        <div class="post-user-info">
+                            <span class="post-username"></span>
+                            <span class="post-location"></span>
+                        </div>
+                    </div>
+                    <div class="post-detail-caption"></div>
+                    <div class="post-detail-stats">
+                        <span class="post-likes"><i class="fas fa-heart"></i> <span class="likes-count"></span></span>
+                        <span class="post-comments"><i class="fas fa-comment"></i> <span class="comments-count"></span></span>
+                        <span class="post-time"></span>
+                    </div>
+                    <div class="post-detail-comments">
+                        <!-- Comments will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error message container -->
+    <div id="error-container" class="error-message" style="display: none;"></div>
+
+    <script src="script.js"></script>
+    <script src="instagram-auth.js"></script>
+    <script src="instagram-api.js"></script>
+    <script src="feed.js"></script>
+</body>
+</html>
