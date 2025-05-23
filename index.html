@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InstaView - Instagram Viewer</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Backend API URL -->
+    <meta name="api-base-url" content="http://localhost:3000">
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">File</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">New</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Open</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Save</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Export</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Exit</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">View</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Zoom In</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Zoom Out</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Full Screen</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Split View</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Layout</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Grid</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">List</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Compact</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Custom</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Account</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Profile</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Settings</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Logout</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Tools</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Search</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Preferences</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Extensions</a>
+            </div>
+        </div>
+        <div class="menu-item-container">
+            <a href="#" class="menu-item" tabindex="0" role="menuitem" aria-haspopup="true">Help</a>
+            <div class="dropdown-menu" role="menu">
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Documentation</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Tutorials</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">About</a>
+                <a href="#" class="dropdown-item" tabindex="0" role="menuitem">Support</a>
+            </div>
+        </div>
+    </div>
+    <div class="login-container">
+        <!-- The heading and paragraph are removed to match the simpler design of the example -->
+
+        <form class="login-form" id="instagram-login-form" action="#" method="POST">
+            <div class="input-group">
+                <!-- <label for="username">Username</label> -->
+                <input type="text" id="username" name="username" placeholder="Username" required>
+            </div>
+
+            <div class="input-group password-group">
+                <!-- <label for="password">Password</label> -->
+                <input type="password" id="password" name="password" placeholder="Password" required>
+                <a href="https://www.instagram.com/accounts/password/reset/" class="forgot-password-inline" target="_blank">Forgot?</a>
+            </div>
+
+            <!-- Instagram OAuth login button -->
+            <button type="button" id="instagram-oauth-btn" class="btn-social btn-instagram">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Instagram icon" class="instagram-icon">
+                Log In With Instagram
+            </button>
+        </form>
+
+        <div class="divider">OR</div>
+
+        <div class="social-login">
+            <!-- Facebook login button -->
+            <button type="button" class="btn-social btn-facebook">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Facebook icon">
+                Log In With Facebook
+            </button>
+        </div>
+
+        <!-- Error message container -->
+        <div id="error-container" class="error-message" style="display: none;"></div>
+
+        <!-- Footer links removed to match the example image -->
+    </div>
+    <script src="script.js"></script>
+    <script src="instagram-auth.js"></script>
+    <script src="instagram-api.js"></script>
+</body>
+</html>
