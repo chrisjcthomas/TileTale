@@ -142,9 +142,9 @@ class InstagramFeed {
                 
                 storyEl.innerHTML = `
                     <div class="story-avatar">
-                        <img src="${story.profile_pic}" alt="${story.username}">
+                        <img src="${window.sanitizeUrl(story.profile_pic)}" alt="${window.escapeHTML(story.username)}">
                     </div>
-                    <span class="story-username">${story.username}</span>
+                    <span class="story-username">${window.escapeHTML(story.username)}</span>
                 `;
                 
                 // Add click event to view story
@@ -190,8 +190,8 @@ class InstagramFeed {
                 // Create post HTML
                 postEl.innerHTML = `
                     <div class="post-header">
-                        <img src="${post.profile_pic}" alt="${post.username}" class="post-user-pic">
-                        <span class="post-username">${post.username}</span>
+                        <img src="${window.sanitizeUrl(post.profile_pic)}" alt="${window.escapeHTML(post.username)}" class="post-user-pic">
+                        <span class="post-username">${window.escapeHTML(post.username)}</span>
                     </div>
                     <div class="post-media">
                         ${this.renderPostMedia(post)}
@@ -204,8 +204,8 @@ class InstagramFeed {
                     <div class="post-info">
                         <div class="post-likes">${post.likes_count} likes</div>
                         <div class="post-caption">
-                            <span class="post-username">${post.username}</span>
-                            ${post.caption}
+                            <span class="post-username">${window.escapeHTML(post.username)}</span>
+                            ${window.escapeHTML(post.caption)}
                         </div>
                         <div class="post-comments-preview">
                             ${post.comments_count > 0 ? `View all ${post.comments_count} comments` : 'No comments yet'}
@@ -230,11 +230,14 @@ class InstagramFeed {
      * Render post media based on type
      */
     renderPostMedia(post) {
+        const safeMediaUrl = window.sanitizeUrl(post.media_url);
+        const safeThumbnailUrl = post.thumbnail_url ? window.sanitizeUrl(post.thumbnail_url) : '';
+
         switch (post.media_type) {
             case 'VIDEO':
                 return `
-                    <video controls poster="${post.thumbnail_url || ''}">
-                        <source src="${post.media_url}" type="video/mp4">
+                    <video controls poster="${safeThumbnailUrl}">
+                        <source src="${safeMediaUrl}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                 `;
@@ -243,10 +246,10 @@ class InstagramFeed {
                     <div class="carousel-indicator">
                         <i class="fas fa-clone"></i>
                     </div>
-                    <img src="${post.media_url}" alt="Post">
+                    <img src="${safeMediaUrl}" alt="Post">
                 `;
             default: // IMAGE
-                return `<img src="${post.media_url}" alt="Post">`;
+                return `<img src="${safeMediaUrl}" alt="Post">`;
         }
     }
     
@@ -338,7 +341,7 @@ class InstagramFeed {
             this.postUserPic.src = post.profile_pic;
             this.postUsername.textContent = post.username;
             this.postLocation.textContent = post.location ? post.location.name : '';
-            this.postDetailCaption.innerHTML = `<span class="post-username">${post.username}</span> ${post.caption}`;
+            this.postDetailCaption.innerHTML = `<span class="post-username">${window.escapeHTML(post.username)}</span> ${window.escapeHTML(post.caption)}`;
             this.postLikesCount.textContent = post.likes_count;
             this.postCommentsCount.textContent = post.comments_count;
             
@@ -380,15 +383,18 @@ class InstagramFeed {
                 slide.className = 'carousel-slide';
                 slide.style.display = index === 0 ? 'block' : 'none';
                 
+                const safeItemMediaUrl = window.sanitizeUrl(item.media_url);
+                const safeItemThumbnailUrl = item.thumbnail_url ? window.sanitizeUrl(item.thumbnail_url) : '';
+
                 if (item.media_type === 'VIDEO') {
                     slide.innerHTML = `
-                        <video controls autoplay poster="${item.thumbnail_url || ''}">
-                            <source src="${item.media_url}" type="video/mp4">
+                        <video controls autoplay poster="${safeItemThumbnailUrl}">
+                            <source src="${safeItemMediaUrl}" type="video/mp4">
                             Your browser does not support the video tag.
                         </video>
                     `;
                 } else {
-                    slide.innerHTML = `<img src="${item.media_url}" alt="Post">`;
+                    slide.innerHTML = `<img src="${safeItemMediaUrl}" alt="Post">`;
                 }
                 
                 carousel.appendChild(slide);
@@ -426,14 +432,18 @@ class InstagramFeed {
             
             this.postDetailMedia.appendChild(carousel);
         } else if (post.media_type === 'VIDEO') {
+            const safeMediaUrl = window.sanitizeUrl(post.media_url);
+            const safeThumbnailUrl = post.thumbnail_url ? window.sanitizeUrl(post.thumbnail_url) : '';
+
             this.postDetailMedia.innerHTML = `
-                <video controls autoplay poster="${post.thumbnail_url || ''}">
-                    <source src="${post.media_url}" type="video/mp4">
+                <video controls autoplay poster="${safeThumbnailUrl}">
+                    <source src="${safeMediaUrl}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
             `;
         } else {
-            this.postDetailMedia.innerHTML = `<img src="${post.media_url}" alt="Post">`;
+            const safeMediaUrl = window.sanitizeUrl(post.media_url);
+            this.postDetailMedia.innerHTML = `<img src="${safeMediaUrl}" alt="Post">`;
         }
     }
     
@@ -457,11 +467,11 @@ class InstagramFeed {
             const timeAgo = this.getTimeAgo(commentTime);
             
             commentEl.innerHTML = `
-                <img src="${comment.profile_pic}" alt="${comment.username}" class="comment-user-pic">
+                <img src="${window.sanitizeUrl(comment.profile_pic)}" alt="${window.escapeHTML(comment.username)}" class="comment-user-pic">
                 <div class="comment-content">
                     <div class="comment-text">
-                        <span class="comment-username">${comment.username}</span>
-                        ${comment.text}
+                        <span class="comment-username">${window.escapeHTML(comment.username)}</span>
+                        ${window.escapeHTML(comment.text)}
                     </div>
                     <div class="comment-meta">
                         <span class="comment-time">${timeAgo}</span>
