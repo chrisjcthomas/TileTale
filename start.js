@@ -12,6 +12,7 @@ const open = require('open');
 // Configuration
 const BACKEND_PORT = process.env.PORT || 3000;
 const FRONTEND_PORT = 5500;
+const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // MIME types for serving static files
 const MIME_TYPES = {
@@ -47,10 +48,17 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
+    // Sanitize the URL to prevent path traversal
+    const safeUrl = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+
     // Default to index.html
-    let filePath = '.' + req.url;
-    if (filePath === './') {
-      filePath = './index.html';
+    let filePath = path.join(PUBLIC_DIR, safeUrl === '/' || safeUrl === '\\' ? 'index.html' : safeUrl);
+
+    // Ensure the resolved path is within the public directory
+    if (!filePath.startsWith(PUBLIC_DIR)) {
+      res.writeHead(403);
+      res.end('Forbidden');
+      return;
     }
 
     // Get the file extension
@@ -61,10 +69,15 @@ function startFrontend() {
     fs.readFile(filePath, (err, content) => {
       if (err) {
         if (err.code === 'ENOENT') {
-          // File not found
-          fs.readFile('./404.html', (err, content) => {
-            res.writeHead(404, { 'Content-Type': 'text/html' });
-            res.end(content || '404 Not Found', 'utf-8');
+          // File not found, try 404.html in public dir
+          fs.readFile(path.join(PUBLIC_DIR, '404.html'), (err, content) => {
+            if (err) {
+               res.writeHead(404, { 'Content-Type': 'text/plain' });
+               res.end('404 Not Found');
+            } else {
+               res.writeHead(404, { 'Content-Type': 'text/html' });
+               res.end(content || '404 Not Found', 'utf-8');
+            }
           });
         } else {
           // Server error
