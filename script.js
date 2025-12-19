@@ -126,11 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
             const password = passwordInput ? passwordInput.value : '';
 
             if (username && password) {
-                console.log('Login attempt with:');
-                console.log('Username:', username);
-                console.log('Password:', password);
                 // Here you would typically send the data to a backend server
-                // For this example, we'll just log it and show an alert.
+                // For this example, we'll just show an alert.
                 alert('Login successful! Backend integration needed for real auth.');
             } else {
                 alert('Please enter both username and password.');
