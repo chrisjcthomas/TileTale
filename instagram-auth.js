@@ -78,9 +78,16 @@ class InstagramAuth {
     checkForAuthCallback() {
         // Parse URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+        // Check both query params (legacy/error) and hash (secure token)
+        let token = urlParams.get('token');
         const error = urlParams.get('error');
         const errorDescription = urlParams.get('error_description');
+
+        // Check hash for token if not in query params
+        if (!token && window.location.hash) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            token = hashParams.get('token');
+        }
 
         // If there's an error in the callback
         if (error) {

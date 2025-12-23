@@ -51,6 +51,7 @@ router.get('/instagram/callback', async (req, res) => {
     }
     
     // Verify state to prevent CSRF attacks
+    // Requires cookie-parser middleware (added in server.js)
     const savedState = req.cookies.instagram_auth_state;
     if (!savedState || state !== savedState) {
       return res.status(400).json({
@@ -83,8 +84,8 @@ router.get('/instagram/callback', async (req, res) => {
     // Generate JWT token
     const token = generateToken(userData);
     
-    // Redirect to frontend with token
-    res.redirect(`/?token=${token}`);
+    // Redirect to frontend with token in fragment to prevent server log leakage
+    res.redirect(`${config.frontendUrl}/#token=${token}`);
   } catch (error) {
     console.error('Auth callback error:', error);
     res.status(500).json({
