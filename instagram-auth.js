@@ -76,11 +76,17 @@ class InstagramAuth {
      * Check if we're in a redirect callback with token from our backend
      */
     checkForAuthCallback() {
-        // Parse URL parameters
+        // Parse URL parameters (check query string first, then hash)
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+        let token = urlParams.get('token');
         const error = urlParams.get('error');
         const errorDescription = urlParams.get('error_description');
+
+        // Check hash fragment if token not in query string
+        if (!token && window.location.hash) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1)); // remove #
+            token = hashParams.get('token');
+        }
 
         // If there's an error in the callback
         if (error) {

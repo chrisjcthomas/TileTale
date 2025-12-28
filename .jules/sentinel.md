@@ -1,0 +1,4 @@
+## 2024-05-22 - Token Leakage via URL Query Params
+**Vulnerability:** JWT authentication tokens were being passed to the frontend via URL query parameters (`/?token=...`). This exposes the token in browser history, proxy logs, and server access logs.
+**Learning:** The initial implementation used a simple redirect strategy without considering the leakage implications of query parameters. The separation of frontend (port 5500) and backend (port 3000) also complicated the redirect flow, leading to broken 404s in addition to the security risk.
+**Prevention:** Always use URL hash fragments (`/#token=...`) for transmitting sensitive data like tokens in redirects to client-side applications. Hash fragments are not sent to the server in HTTP requests and are not typically logged by intermediate proxies. Also, ensure redirect targets are configurable to handle different development environments (ports).

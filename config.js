@@ -9,6 +9,7 @@ module.exports = {
   // Server configuration
   port: process.env.PORT || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
+  clientUrl: process.env.CLIENT_URL || 'http://localhost:5500', // Default to frontend dev port
   
   // Instagram API configuration
   instagram: {
