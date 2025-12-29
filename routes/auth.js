@@ -84,7 +84,7 @@ router.get('/instagram/callback', async (req, res) => {
     const token = generateToken(userData);
     
     // Redirect to frontend with token
-    res.redirect(`/?token=${token}`);
+    res.redirect(`/#token=${token}`);
   } catch (error) {
     console.error('Auth callback error:', error);
     res.status(500).json({
