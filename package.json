@@ -21,7 +21,8 @@
     "jsonwebtoken": "^9.0.2",
     "memory-cache": "^0.2.0",
     "morgan": "^1.10.0",
-    "open": "^8.4.2"
+    "open": "^8.4.2",
+    "playwright": "^1.57.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"

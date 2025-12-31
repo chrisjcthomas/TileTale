@@ -89,9 +89,7 @@ class InstagramAPI {
      * Get user profile information
      */
     async getUserProfile() {
-        console.log('Fetching real user profile from API');
         const response = await this.makeRequest('/profile');
-        console.log('API response:', response);
         return response.data;
     }
 

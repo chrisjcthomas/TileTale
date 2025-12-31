@@ -22,6 +22,7 @@ router.get('/instagram', (req, res) => {
   // Store state in session or cookie (for demo, we'll use a cookie)
   res.cookie('instagram_auth_state', state, { 
     httpOnly: true, 
+    secure: config.nodeEnv === 'production',
     maxAge: 3600000, // 1 hour
     sameSite: 'lax'
   });
