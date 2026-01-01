@@ -3,6 +3,7 @@
  */
 
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const config = require('../config');
 const instagramController = require('../controllers/instagramController');
@@ -16,8 +17,7 @@ const cache = require('../middleware/cache');
  */
 router.get('/instagram', (req, res) => {
   // Generate a random state for CSRF protection
-  const state = Math.random().toString(36).substring(2, 15) + 
-                Math.random().toString(36).substring(2, 15);
+  const state = crypto.randomBytes(16).toString('hex');
   
   // Store state in session or cookie (for demo, we'll use a cookie)
   res.cookie('instagram_auth_state', state, { 
@@ -84,7 +84,7 @@ router.get('/instagram/callback', async (req, res) => {
     const token = generateToken(userData);
     
     // Redirect to frontend with token
-    res.redirect(`/?token=${token}`);
+    res.redirect(`${config.clientUrl}/?token=${token}`);
   } catch (error) {
     console.error('Auth callback error:', error);
     res.status(500).json({
