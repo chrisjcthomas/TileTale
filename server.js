@@ -7,6 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const config = require('./config');
 
 // Import routes
@@ -30,6 +31,9 @@ app.use(express.json());
 
 // Parse URL-encoded request body
 app.use(express.urlencoded({ extended: true }));
+
+// Parse cookies
+app.use(cookieParser());
 
 // Apply rate limiting
 const limiter = rateLimit(config.rateLimit);
