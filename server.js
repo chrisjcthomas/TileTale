@@ -7,6 +7,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const cookieParser = require('cookie-parser');
 const config = require('./config');
 
 // Import routes
@@ -30,6 +31,9 @@ app.use(express.json());
 
 // Parse URL-encoded request body
 app.use(express.urlencoded({ extended: true }));
+
+// Parse cookies
+app.use(cookieParser());
 
 // Apply rate limiting
 const limiter = rateLimit(config.rateLimit);
@@ -59,8 +63,10 @@ app.use((err, req, res, next) => {
 
 // Start the server
 const PORT = config.port;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} in ${config.nodeEnv} mode`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT} in ${config.nodeEnv} mode`);
+  });
+}
 
 module.exports = app; // Export for testing
