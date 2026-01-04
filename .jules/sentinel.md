@@ -1,0 +1,4 @@
+## 2024-05-24 - [CRITICAL] Path Traversal in Development Server
+**Vulnerability:** The `start.js` development server was vulnerable to Path Traversal / Arbitrary File Read. It constructed file paths using `'.' + req.url` without validation, allowing access to sensitive files like `.env`, `server.js`, and `.git` configuration via requests like `GET /server.js` or `GET /.env`.
+**Learning:** Even development tools (`npm run dev:all`) can introduce critical vulnerabilities if they expose a web server. Developers often assume these scripts are safe or "local only", but if the port is exposed (e.g., in cloud IDEs or misconfigured networks), the entire codebase and secrets are compromised.
+**Prevention:** Always sanitize file paths in custom file servers. Use `path.resolve` and check that the resolved path starts with the expected root directory. Whitelist allowed file extensions and block sensitive file names explicitly.

@@ -26,6 +26,21 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
+// Files that should NEVER be served
+const BLOCKED_FILES = [
+  '.env',
+  '.git',
+  '.gitignore',
+  'server.js',
+  'config.js',
+  'package.json',
+  'package-lock.json',
+  'start.js',
+  'start-app.sh',
+  'start-app.bat',
+  'README.md'
+];
+
 // Start the backend server
 function startBackend() {
   console.log('Starting backend server...');
@@ -47,14 +62,54 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
+    // Basic path sanitization
+    const safeUrl = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+
     // Default to index.html
-    let filePath = '.' + req.url;
-    if (filePath === './') {
+    let filePath = '.' + safeUrl;
+    if (filePath === './' || filePath === '.') {
       filePath = './index.html';
+    }
+
+    // Resolve absolute path to check for traversal
+    const resolvedPath = path.resolve(filePath);
+    const rootPath = path.resolve('.');
+
+    // Security Check 1: Ensure file is within root directory (prevents ../../../ etc)
+    if (!resolvedPath.startsWith(rootPath)) {
+      res.writeHead(403);
+      res.end('403 Forbidden: Access Denied');
+      return;
     }
 
     // Get the file extension
     const extname = path.extname(filePath);
+
+    // Security Check 2: Block sensitive files and ensure extension is allowed
+    const basename = path.basename(filePath);
+
+    // Check against blocked files list (exact match or starts with .env)
+    const isBlocked = BLOCKED_FILES.some(blocked =>
+      basename === blocked ||
+      basename.startsWith('.env') ||
+      basename === '.git'
+    );
+
+    // Also block files without extension if not whitelisted (assuming most sensitive files don't have extension or are specific)
+    // But index.html has extension.
+    // Also check if extension is in MIME_TYPES
+    const isAllowedType = Object.keys(MIME_TYPES).includes(extname);
+
+    if (isBlocked || !isAllowedType) {
+      // Allow specific exceptions if needed, but generally if it's not a known web type or is blocked, deny it.
+      // Exception: if it's a directory, we might want to serve index.html, but we handled that earlier with req.url
+
+      console.log(`[Security] Blocked access to: ${filePath}`);
+      res.writeHead(403);
+      res.end('403 Forbidden: Restricted File');
+      return;
+    }
+
     let contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
     // Read the file
