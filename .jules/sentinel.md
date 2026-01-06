@@ -1,0 +1,4 @@
+## 2026-01-06 - Path Traversal in Custom Dev Server
+**Vulnerability:** The `start.js` script (used for development) contained a path traversal vulnerability where user input was directly concatenated to paths (`.` + req.url), allowing access to arbitrary files on the system (e.g., `/etc/passwd`).
+**Learning:** Custom HTTP servers created with `http.createServer` do not have built-in path sanitization like Express's `express.static`. Developers must manually resolve and validate paths against a root directory.
+**Prevention:** Always use `path.resolve()` and check if the resulting path starts with the intended root directory. Use `path.sep` to prevent sibling directory attacks (e.g., `/app` matching `/app_secret`). Prefer established libraries like `serve-handler` or `express.static` even for dev tools.
