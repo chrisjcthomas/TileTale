@@ -53,6 +53,20 @@ function startFrontend() {
       filePath = './index.html';
     }
 
+    // Sentinel: Security Check - Prevent access to sensitive files
+    const sensitiveFiles = ['.env', 'config.js', 'server.js', 'package.json', '.gitignore'];
+    const sensitiveDirs = ['/routes/', '/controllers/', '/middleware/', '/.git/'];
+
+    const isSensitiveFile = sensitiveFiles.some(file => filePath.endsWith('/' + file) || filePath === './' + file);
+    const isSensitiveDir = sensitiveDirs.some(dir => req.url.includes(dir));
+
+    if (isSensitiveFile || isSensitiveDir) {
+      console.warn(`Blocked access to sensitive file: ${filePath}`);
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('403 Forbidden: Access to this file is restricted.');
+      return;
+    }
+
     // Get the file extension
     const extname = path.extname(filePath);
     let contentType = MIME_TYPES[extname] || 'application/octet-stream';
