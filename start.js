@@ -47,10 +47,38 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
-    // Default to index.html
-    let filePath = '.' + req.url;
+    // Security: Normalize path to prevent directory traversal
+    const normalizedPath = path.normalize(req.url).replace(/^(\.\.[\/\\])+/, '');
+    let filePath = '.' + normalizedPath;
+
     if (filePath === './') {
       filePath = './index.html';
+    }
+
+    // Security: Check for sensitive files and directories
+    const fileName = path.basename(filePath).toLowerCase();
+
+    // 1. Block sensitive directories
+    // Normalize to forward slashes for cross-platform check
+    const normalizedPathForCheck = normalizedPath.split(path.sep).join('/');
+    const sensitiveDirs = ['/routes', '/controllers', '/middleware', '/node_modules', '/.git'];
+    const isSensitiveDir = sensitiveDirs.some(dir => normalizedPathForCheck.startsWith(dir));
+
+    if (isSensitiveDir) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      return res.end('Access Denied: Sensitive directory');
+    }
+
+    // 2. Block sensitive files
+    const sensitiveFiles = [
+      'config.js', 'server.js', 'start.js', 'package.json', 'package-lock.json',
+      '.env', '.gitignore', 'start-app.sh', 'start-app.bat', 'readme.md'
+    ];
+
+    // Check exact matches or files starting with .env
+    if (sensitiveFiles.includes(fileName) || fileName.startsWith('.env')) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      return res.end('Access Denied: Sensitive file');
     }
 
     // Get the file extension
