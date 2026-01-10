@@ -26,6 +26,21 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
+// Block sensitive files and directories
+const BLOCKED_PATHS = [
+  /^\/\./, // Hidden files (e.g., .env, .git)
+  /^\/config\.js/,
+  /^\/server\.js/,
+  /^\/start\.js/,
+  /^\/routes/,
+  /^\/controllers/,
+  /^\/middleware/,
+  /^\/node_modules/,
+  /^\/package\.json/,
+  /^\/package-lock\.json/,
+  /^\/README\.md/
+];
+
 // Start the backend server
 function startBackend() {
   console.log('Starting backend server...');
@@ -47,6 +62,21 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
+    // Security checks
+    const sanitizedUrl = req.url.split('?')[0]; // Remove query params
+
+    // Prevent directory traversal
+    if (sanitizedUrl.includes('..')) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+
+    // Block sensitive files and directories
+    if (BLOCKED_PATHS.some(pattern => pattern.test(sanitizedUrl))) {
+      res.writeHead(403);
+      return res.end('Forbidden');
+    }
+
     // Default to index.html
     let filePath = '.' + req.url;
     if (filePath === './') {
