@@ -47,11 +47,46 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
+    // Parse URL to handle query parameters and decoding
+    const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+    let pathname = parsedUrl.pathname;
+
     // Default to index.html
-    let filePath = '.' + req.url;
-    if (filePath === './') {
-      filePath = './index.html';
+    if (pathname === '/') {
+      pathname = '/index.html';
     }
+
+    // Security: Prevent Directory Traversal & Restrict Access
+    // 1. Normalize path to resolve '..'
+    const normalizedPath = path.normalize(pathname).replace(/^(\.\.[\/\\])+/, '');
+
+    // 2. Ensure path is relative to current directory (files are in root)
+    const absolutePath = path.join(process.cwd(), normalizedPath);
+    if (!absolutePath.startsWith(process.cwd())) {
+        res.writeHead(403);
+        res.end('Access Denied');
+        return;
+    }
+
+    // 3. Whitelist allowed files to prevent exposing backend code/secrets
+    const filename = path.basename(absolutePath);
+    const ALLOWED_FILES = [
+        'index.html', 'feed.html', '404.html',
+        'style.css',
+        'script.js', 'feed.js', 'service-worker.js',
+        'manifest.json',
+        'icon-192x192.svg', 'icon-512x512.svg'
+    ];
+
+    // Ensure we are only serving files from the root directory (no subdirectories allowed based on current structure)
+    const dir = path.dirname(absolutePath);
+    if (dir !== process.cwd() || !ALLOWED_FILES.includes(filename)) {
+        res.writeHead(403);
+        res.end('Access Denied');
+        return;
+    }
+
+    let filePath = '.' + pathname;
 
     // Get the file extension
     const extname = path.extname(filePath);
