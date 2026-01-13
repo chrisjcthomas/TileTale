@@ -1,0 +1,4 @@
+## 2026-01-13 - [Mixed Frontend/Backend Files Create Security Risk]
+**Vulnerability:** The root directory contained both sensitive backend files (`.env`, `server.js`) and public frontend files. The `start.js` dev server was configured to serve *all* files from the root to support the frontend, inadvertently exposing secrets and source code.
+**Learning:** Mixing frontend static assets and backend source code in the same directory makes it impossible to use simple static file serving middleware safely. A "serve everything" approach usually leads to path traversal or unintended exposure when the root is the target.
+**Prevention:** Always separate frontend assets into a dedicated `public/` or `client/` directory. If they must be mixed, implement a strict whitelist of allowed files rather than a blacklist or open access.

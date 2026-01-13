@@ -26,6 +26,37 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
+// Whitelist of allowed files to serve
+const ALLOWED_FILES = [
+  '/',
+  '/index.html',
+  '/feed.html',
+  '/style.css',
+  '/script.js',
+  '/feed.js',
+  '/instagram-api.js',
+  '/instagram-auth.js',
+  '/service-worker.js',
+  '/manifest.json',
+  '/favicon.ico',
+  '/404.html'
+];
+
+// Regex for allowed patterns (e.g., icons)
+const ALLOWED_PATTERNS = [
+  /^\/icon-[\w-]+\.svg$/
+];
+
+function isAllowed(urlPath) {
+  // Handle query strings by parsing only the pathname
+  const requestPath = urlPath.split('?')[0];
+
+  // Check against whitelist using the cleaned path
+  if (ALLOWED_FILES.includes(requestPath)) return true;
+  if (ALLOWED_PATTERNS.some(pattern => pattern.test(requestPath))) return true;
+  return false;
+}
+
 // Start the backend server
 function startBackend() {
   console.log('Starting backend server...');
@@ -47,6 +78,14 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
+    // Security check: only serve allowed files
+    if (!isAllowed(req.url)) {
+      console.warn(`Blocked access to: ${req.url}`);
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('Access Denied');
+      return;
+    }
+
     // Default to index.html
     let filePath = '.' + req.url;
     if (filePath === './') {
