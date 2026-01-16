@@ -47,18 +47,58 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
-    // Default to index.html
-    let filePath = '.' + req.url;
-    if (filePath === './') {
-      filePath = './index.html';
+    // Basic security: Prevent path traversal and restrict access to sensitive files
+    let targetPath;
+    try {
+      const decodedUrl = decodeURIComponent(req.url);
+      const rootDir = path.resolve('.');
+      targetPath = path.resolve(rootDir, '.' + decodedUrl);
+
+      // Prevent directory traversal
+      if (!targetPath.startsWith(rootDir)) {
+        console.warn(`[Security] Blocked traversal attempt: ${req.url}`);
+        res.writeHead(403);
+        res.end('Forbidden: Access denied');
+        return;
+      }
+
+      // Default to index.html if root is requested
+      if (req.url === '/' || targetPath === rootDir) {
+        targetPath = path.join(rootDir, 'index.html');
+      }
+
+      // Restrict access to sensitive files and directories
+      const relativePath = path.relative(rootDir, targetPath);
+      const filename = path.basename(targetPath);
+      const sensitiveFiles = [
+        'package.json', 'package-lock.json', '.env', 'config.js',
+        'server.js', 'start.js', 'start-app.sh', 'start-app.bat'
+      ];
+      const sensitiveDirs = ['node_modules', '.git', 'routes', 'controllers', 'middleware'];
+
+      const isSensitive = sensitiveFiles.includes(filename) ||
+                          filename.startsWith('.') ||
+                          sensitiveDirs.some(dir => relativePath.split(path.sep).includes(dir));
+
+      if (isSensitive) {
+        console.warn(`[Security] Blocked sensitive file access: ${relativePath}`);
+        res.writeHead(403);
+        res.end('Forbidden: Access to sensitive file denied');
+        return;
+      }
+    } catch (e) {
+      console.error('Error parsing URL:', e);
+      res.writeHead(400);
+      res.end('Bad Request');
+      return;
     }
 
     // Get the file extension
-    const extname = path.extname(filePath);
+    const extname = path.extname(targetPath);
     let contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
     // Read the file
-    fs.readFile(filePath, (err, content) => {
+    fs.readFile(targetPath, (err, content) => {
       if (err) {
         if (err.code === 'ENOENT') {
           // File not found
