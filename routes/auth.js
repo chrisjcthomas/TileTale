@@ -8,6 +8,27 @@ const config = require('../config');
 const instagramController = require('../controllers/instagramController');
 const { generateToken } = require('../middleware/auth');
 const cache = require('../middleware/cache');
+const crypto = require('crypto');
+
+/**
+ * Helper to parse cookies from request headers
+ */
+const parseCookies = (req) => {
+  const list = {};
+  const cookieHeader = req.headers.cookie;
+  if (!cookieHeader) return list;
+
+  cookieHeader.split(';').forEach(cookie => {
+    let [name, ...rest] = cookie.split('=');
+    name = name?.trim();
+    if (!name) return;
+    const value = rest.join('=').trim();
+    if (!value) return;
+    list[name] = decodeURIComponent(value);
+  });
+
+  return list;
+};
 
 /**
  * @route   GET /auth/instagram
@@ -15,9 +36,8 @@ const cache = require('../middleware/cache');
  * @access  Public
  */
 router.get('/instagram', (req, res) => {
-  // Generate a random state for CSRF protection
-  const state = Math.random().toString(36).substring(2, 15) + 
-                Math.random().toString(36).substring(2, 15);
+  // Generate a cryptographically secure random state for CSRF protection
+  const state = crypto.randomBytes(16).toString('hex');
   
   // Store state in session or cookie (for demo, we'll use a cookie)
   res.cookie('instagram_auth_state', state, { 
@@ -51,7 +71,9 @@ router.get('/instagram/callback', async (req, res) => {
     }
     
     // Verify state to prevent CSRF attacks
-    const savedState = req.cookies.instagram_auth_state;
+    const cookies = parseCookies(req);
+    const savedState = cookies.instagram_auth_state;
+
     if (!savedState || state !== savedState) {
       return res.status(400).json({
         status: 'error',
