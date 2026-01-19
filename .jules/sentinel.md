@@ -1,0 +1,4 @@
+## 2025-01-20 - [Fix Broken CSRF Protection and Weak RNG]
+**Vulnerability:** The OAuth state generation used `Math.random()`, which is predictable. Furthermore, the CSRF validation logic relied on `req.cookies` which was undefined because `cookie-parser` middleware was missing, causing the auth flow to crash or fail securely.
+**Learning:** Even standard patterns (like checking `req.cookies`) can fail if the underlying middleware infrastructure is not present. Always verify that assumed middleware (like `cookie-parser`) is actually configured in the main server file.
+**Prevention:** Use `crypto.randomBytes` for security tokens. When working in a legacy or minimal codebase, verify middleware presence before using its injected properties (like `req.cookies`, `req.body`), or use standard headers directly if adding dependencies is restricted.
