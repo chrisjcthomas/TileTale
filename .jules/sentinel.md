@@ -1,0 +1,4 @@
+## 2026-01-23 - Broken CSRF Protection via Missing Middleware
+**Vulnerability:** CSRF protection in `auth.js` relied on `req.cookies`, but `cookie-parser` middleware was missing from the project. This caused the auth callback to crash (500) and effectively broke the authentication flow, while also making the CSRF check non-functional (if it didn't crash). Also, the state generation used weak `Math.random()`.
+**Learning:** Checking for dependency usage is critical. Just because code *tries* to use a cookie doesn't mean the middleware is loaded. In Express, properties like `req.cookies` are populated by middleware, not by default.
+**Prevention:** Always verify middleware configuration in `server.js` matches the expectations of the routes. Use strict linting or tests that mock the request pipeline accurately to catch missing middleware.
