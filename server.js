@@ -5,6 +5,7 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const config = require('./config');
@@ -18,6 +19,9 @@ const app = express();
 
 // Apply security middleware
 app.use(helmet());
+
+// Parse cookies
+app.use(cookieParser());
 
 // Configure CORS
 app.use(cors(config.cors));
