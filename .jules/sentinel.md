@@ -1,0 +1,4 @@
+## 2024-05-22 - Implicit Middleware Dependency causing DoS
+**Vulnerability:** The authentication callback crashed with a `TypeError` because `req.cookies` was undefined. The application relied on `cookie-parser` middleware which was neither installed nor registered, rendering the CSRF protection logic not only broken but a source of application instability (DoS).
+**Learning:** Security logic (like CSRF checks) often relies on middleware to parse inputs. When these implicit dependencies are missing, the security check might not just fail, but crash the application.
+**Prevention:** Always verify that necessary middleware is registered in the entry point (`server.js`) when using properties like `req.cookies`, `req.body`, etc. Use defensive coding (e.g., `req.cookies && req.cookies.value`) to fail securely rather than crashing.
