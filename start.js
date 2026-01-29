@@ -47,36 +47,78 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
-    // Default to index.html
-    let filePath = '.' + req.url;
-    if (filePath === './') {
-      filePath = './index.html';
-    }
+    try {
+      // Parse URL to handle query parameters and decoding
+      const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
+      let pathname = parsedUrl.pathname;
 
-    // Get the file extension
-    const extname = path.extname(filePath);
-    let contentType = MIME_TYPES[extname] || 'application/octet-stream';
-
-    // Read the file
-    fs.readFile(filePath, (err, content) => {
-      if (err) {
-        if (err.code === 'ENOENT') {
-          // File not found
-          fs.readFile('./404.html', (err, content) => {
-            res.writeHead(404, { 'Content-Type': 'text/html' });
-            res.end(content || '404 Not Found', 'utf-8');
-          });
-        } else {
-          // Server error
-          res.writeHead(500);
-          res.end(`Server Error: ${err.code}`);
-        }
-      } else {
-        // Success
-        res.writeHead(200, { 'Content-Type': contentType });
-        res.end(content, 'utf-8');
+      // Default to index.html
+      if (pathname === '/') {
+        pathname = '/index.html';
       }
-    });
+
+      // Security: Resolve path to absolute path to prevent traversal
+      const fullPath = path.join(__dirname, pathname);
+
+      // 1. Path Traversal Check
+      if (!fullPath.startsWith(__dirname)) {
+        console.warn(`[Security] Blocked path traversal attempt: ${req.url}`);
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
+
+      // 2. Sensitive File Block
+      // Define sensitive files and directories that should not be served
+      const BLACKLIST = [
+        'server.js', 'config.js', 'start.js', '.env', 'package.json', 'package-lock.json',
+        'README.md', 'start-app.sh', 'start-app.bat', '.gitignore'
+      ];
+      const BLACKLIST_DIRS = ['routes', 'controllers', 'middleware', 'node_modules', '.git', '.jules'];
+
+      const relativePath = path.relative(__dirname, fullPath);
+      // Check if exact match or inside blocked directory
+      const pathSegments = relativePath.split(path.sep);
+      const rootSegment = pathSegments[0];
+
+      if (BLACKLIST.includes(relativePath) || BLACKLIST_DIRS.includes(rootSegment)) {
+        console.warn(`[Security] Blocked sensitive file access: ${req.url}`);
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('Forbidden');
+        return;
+      }
+
+      // Get the file extension for MIME type
+      const extname = path.extname(fullPath);
+      let contentType = MIME_TYPES[extname] || 'application/octet-stream';
+
+      // Read the file
+      fs.readFile(fullPath, (err, content) => {
+        if (err) {
+          if (err.code === 'ENOENT') {
+            // File not found
+            // Check if 404.html exists
+            const path404 = path.join(__dirname, '404.html');
+            fs.readFile(path404, (err404, content404) => {
+              res.writeHead(404, { 'Content-Type': 'text/html' });
+              res.end(content404 || '404 Not Found', 'utf-8');
+            });
+          } else {
+            // Server error
+            res.writeHead(500);
+            res.end(`Server Error: ${err.code}`);
+          }
+        } else {
+          // Success
+          res.writeHead(200, { 'Content-Type': contentType });
+          res.end(content, 'utf-8');
+        }
+      });
+    } catch (error) {
+       console.error('Request handling error:', error);
+       res.writeHead(400);
+       res.end('Bad Request');
+    }
   });
 
   server.listen(FRONTEND_PORT, () => {
