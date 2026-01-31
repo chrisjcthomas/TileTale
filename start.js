@@ -57,6 +57,48 @@ function startFrontend() {
     const extname = path.extname(filePath);
     let contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
+    // SECURITY: Prevent Path Traversal and protect sensitive files
+    const rootDir = path.resolve('.');
+    const absolutePath = path.resolve(filePath);
+
+    // 1. Ensure path is within root directory
+    if (!absolutePath.startsWith(rootDir)) {
+      res.writeHead(403);
+      res.end('Forbidden: Access denied');
+      return;
+    }
+
+    // 2. Check for sensitive files/directories
+    const relativePath = path.relative(rootDir, absolutePath);
+    const parts = relativePath.split(path.sep);
+
+    // Block hidden files (starting with .)
+    if (parts.some(part => part.startsWith('.'))) {
+      res.writeHead(403);
+      res.end('Forbidden: Access to hidden files denied');
+      return;
+    }
+
+    // Block sensitive backend directories
+    const blockedDirs = ['routes', 'controllers', 'middleware', 'node_modules'];
+    if (parts.some(part => blockedDirs.includes(part))) {
+      res.writeHead(403);
+      res.end('Forbidden: Access to sensitive directory denied');
+      return;
+    }
+
+    // Block sensitive files in root
+    const blockedFiles = [
+      'server.js', 'start.js', 'config.js',
+      'package.json', 'package-lock.json',
+      'README.md', 'start-app.sh', 'start-app.bat'
+    ];
+    if (parts.length === 1 && blockedFiles.includes(parts[0])) {
+      res.writeHead(403);
+      res.end('Forbidden: Access to sensitive file denied');
+      return;
+    }
+
     // Read the file
     fs.readFile(filePath, (err, content) => {
       if (err) {
