@@ -47,18 +47,61 @@ function startFrontend() {
   console.log('Starting frontend server...');
 
   const server = http.createServer((req, res) => {
+    // Parse URL to handle query parameters and decoding
+    // We use a dummy base because we only care about the pathname
+    const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
+    let pathname = decodeURIComponent(parsedUrl.pathname);
+
     // Default to index.html
-    let filePath = '.' + req.url;
-    if (filePath === './') {
-      filePath = './index.html';
+    if (pathname === '/') {
+      pathname = '/index.html';
+    }
+
+    // SECURITY: Prevent Directory Traversal & Information Disclosure
+    const rootDir = path.resolve('.');
+    const fullPath = path.resolve(rootDir, '.' + pathname);
+
+    // 1. Ensure the path is within the root directory
+    if (!fullPath.startsWith(rootDir)) {
+      console.log(`[Security] Blocked traversal attempt: ${req.url}`);
+      res.writeHead(403);
+      res.end('403 Forbidden');
+      return;
+    }
+
+    // 2. Block sensitive files and directories
+    const filename = path.basename(fullPath);
+    const relativePath = path.relative(rootDir, fullPath);
+
+    // Deny List
+    const deniedFiles = [
+      'server.js', 'start.js', 'config.js', 'package.json', 'package-lock.json',
+      'README.md', '.env', '.env.example', '.gitignore', 'start-app.bat', 'start-app.sh',
+      'instagram-integration-progress.md'
+    ];
+    const deniedDirs = ['routes', 'controllers', 'middleware', 'node_modules', '.git'];
+
+    const isDeniedFile = deniedFiles.includes(filename) || filename.startsWith('.');
+
+    // Check if path is in a denied directory
+    // We check if the relative path starts with any denied directory
+    const isDeniedDir = deniedDirs.some(dir =>
+      relativePath.startsWith(dir + path.sep) || relativePath === dir
+    );
+
+    if (isDeniedFile || isDeniedDir) {
+      console.log(`[Security] Blocked access to sensitive file: ${relativePath}`);
+      res.writeHead(403);
+      res.end('403 Forbidden');
+      return;
     }
 
     // Get the file extension
-    const extname = path.extname(filePath);
+    const extname = path.extname(fullPath);
     let contentType = MIME_TYPES[extname] || 'application/octet-stream';
 
     // Read the file
-    fs.readFile(filePath, (err, content) => {
+    fs.readFile(fullPath, (err, content) => {
       if (err) {
         if (err.code === 'ENOENT') {
           // File not found
