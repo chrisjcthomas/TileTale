@@ -50,7 +50,14 @@ function startFrontend() {
     // Parse URL to handle query parameters and decoding
     // We use a dummy base because we only care about the pathname
     const parsedUrl = new URL(req.url, `http://${req.headers.host}`);
-    let pathname = decodeURIComponent(parsedUrl.pathname);
+    let pathname;
+    try {
+      pathname = decodeURIComponent(parsedUrl.pathname);
+    } catch (e) {
+      res.writeHead(400);
+      res.end('400 Bad Request');
+      return;
+    }
 
     // Default to index.html
     if (pathname === '/') {
