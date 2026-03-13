@@ -78,9 +78,15 @@ class InstagramAuth {
     checkForAuthCallback() {
         // Parse URL parameters
         const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('token');
+        let token = urlParams.get('token');
         const error = urlParams.get('error');
         const errorDescription = urlParams.get('error_description');
+
+        // Check for token in hash fragment (more secure, not logged by servers)
+        if (!token) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            token = hashParams.get('token');
+        }
 
         // If there's an error in the callback
         if (error) {
@@ -101,7 +107,7 @@ class InstagramAuth {
                     expires_in: (tokenData.exp - Math.floor(Date.now() / 1000))
                 });
 
-                // Remove token from URL (for security)
+                // Remove token from URL/hash (for security)
                 window.history.replaceState({}, document.title, '/');
 
                 // Redirect to feed page
@@ -196,8 +202,9 @@ class InstagramAuth {
      * Generate a random state parameter for CSRF protection
      */
     generateRandomState() {
-        return Math.random().toString(36).substring(2, 15) +
-               Math.random().toString(36).substring(2, 15);
+        const array = new Uint32Array(2);
+        window.crypto.getRandomValues(array);
+        return array[0].toString(36) + array[1].toString(36);
     }
 
     /**
@@ -277,7 +284,3 @@ const instagramAuth = new InstagramAuth();
 
 // Export for use in other modules
 window.instagramAuth = instagramAuth;
-
-
-
-
